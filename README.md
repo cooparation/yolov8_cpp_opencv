@@ -12,12 +12,12 @@ which can be deployed on the Horizon X3 board. To train or convert the yolov8 mo
  > OpenCV >= 4.5.5<br>
 
 ## build and run
-    *   build:
+*  build:
     ```
     mkdir build
     cd build && cmake .. && make -j8
     ```
-    * run
+* run
     ```
     ./build/YOLOv8 seg_dfl
     ```
