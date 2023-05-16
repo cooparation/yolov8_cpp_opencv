@@ -8,7 +8,7 @@ which can be deployed on the Horizon X3 board. To train or convert the yolov8 mo
 * instance segmentation
 * pose estimation
  
-## requirements: opencv-dn:
+## requirements: opencv-dnn:
  > OpenCV >= 4.5.5<br>
 
 ## build and run
