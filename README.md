@@ -21,3 +21,5 @@ which can be deployed on the Horizon X3 board. To train or convert the yolov8 mo
     ```
     ./build/YOLOv8 seg_dfl
     ```
+* note
+   ``` please always try to use [netron](https://netron.app/) to check your model ```
