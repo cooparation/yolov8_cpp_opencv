@@ -1,12 +1,11 @@
 #include <iostream>
-#include<opencv2/opencv.hpp>
-
-#include<math.h>
-#include "yolov8.h"
-#include "yolov8_onnx.h"
+#include <opencv2/opencv.hpp>
+#include <math.h>
 #include "yolov8_seg.h"
-#include "yolov8_seg_onnx.h"
-#include<time.h>
+#include "yolov8_seg_dfl.h"
+#include "yolov8_det.h"
+#include "yolov8_det_dfl.h"
+#include "yolov8_pose_dfl.h"
 
 using namespace std;
 using namespace cv;
@@ -15,7 +14,6 @@ using namespace dnn;
 template<typename _Tp>
 int yolov8(_Tp& cls,Mat& img,string& model_path)
 {
-
 	Net net;
 	if (cls.ReadModel(net, model_path, false)) {
 		cout << "read net ok!" << endl;
@@ -23,7 +21,7 @@ int yolov8(_Tp& cls,Mat& img,string& model_path)
 	else {
 		return -1;
 	}
-	//生成随机颜色
+	// generate random colors
 	vector<Scalar> color;
 	srand(time(0));
 	for (int i = 0; i < 80; i++) {
@@ -45,54 +43,46 @@ int yolov8(_Tp& cls,Mat& img,string& model_path)
 	return 0;
 }
 
-template<typename _Tp>
-int yolov8_onnx(_Tp& cls, Mat& img, string& model_path)
-{
-
-	if (cls.ReadModel( model_path, false)) {
-		cout << "read net ok!" << endl;
-	}
-	else {
-		return -1;
-	}
-	//生成随机颜色
-	vector<Scalar> color;
-	srand(time(0));
-	for (int i = 0; i < 80; i++) {
-		int b = rand() % 256;
-		int g = rand() % 256;
-		int r = rand() % 256;
-		color.push_back(Scalar(b, g, r));
-	}
-	vector<OutputSeg> result;
-	if (cls.OnnxDetect(img, result)) {
-		DrawPred(img, result, cls._className, color);
-	}
-	else {
-		cout << "Detect Failed!" << endl;
-	}
-	system("pause");
-	return 0;
-}
-
-
-int main() {
+int main(int argc, char const* argv[]) {
 
 	string img_path = "./images/zidane.jpg";
-	string seg_model_path = "./models/yolov8s-seg.onnx";
-	string detect_model_path = "./models/yolov8s.onnx";
+	string det_model_path = "./onnx_models/yolov8n.onnx";
+	string seg_model_path = "./onnx_models/yolov8n-seg.onnx";
+	string det_model_path_dfl = "./onnx_models/x3/yolov8n_x3.onnx";
+	string seg_model_path_dfl = "./onnx_models/x3/yolov8n-seg_x3.onnx";
+	string pose_model_path_dfl = "./onnx_models/x3/yolov8n-pose_x3.onnx";
+
 	Mat img = imread(img_path);
 
-	Yolov8 task_detect;
-	Yolov8Seg task_segment;
+    std::string task_name = "pose_dfl";
 
-	Yolov8Onnx task_detect_onnx;
-	Yolov8SegOnnx task_segment_onnx;
+    if(argc == 2){
+        task_name = argv[1];
+    }else{
+        cout << "Usage: "<<argv[0] << " det" <<
+            "\ndefault is det, also you can try [det, det_dfl, seg, seg_dfl]"
+            << endl;
+    }
 
-	yolov8(task_detect,img,detect_model_path);    //Opencv detect
-	yolov8(task_segment,img,seg_model_path);   //opencv segment
-	yolov8_onnx(task_detect_onnx,img,detect_model_path);  //onnxruntime detect
-	yolov8_onnx(task_segment_onnx,img,seg_model_path); //onnxruntime segment
+    if(task_name == "det"){
+        Yolov8 task_det;
+        yolov8(task_det, img, det_model_path);
+    }
+    if(task_name == "det_dfl"){
+        Yolov8_Det_DFL task_det_x3;
+        yolov8(task_det_x3, img, det_model_path_dfl);
+    }
+    if(task_name == "seg"){
+        Yolov8Seg task_segment;
+        yolov8(task_segment, img, seg_model_path);
+    }
+    if(task_name == "seg_dfl"){
+        Yolov8_Seg_DFL task_segment_x3;
+        yolov8(task_segment_x3, img, seg_model_path_dfl);
+    }
+    if(task_name == "pose_dfl"){
+        Yolov8_Pose_DFL task_pose_x3;
+        yolov8(task_pose_x3, img, pose_model_path_dfl);
+    }
 
-	return 0;
 }
